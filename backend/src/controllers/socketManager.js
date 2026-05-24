@@ -1,16 +1,31 @@
 import { Server } from "socket.io"
 
+const normalizeOrigins = (value, fallback = []) => {
+    const origins = [...fallback].filter((origin) => typeof origin === "string" && origin.trim());
+
+    if (value) {
+        origins.push(...value.split(","));
+    }
+
+    return [...new Set(origins.map((origin) => origin.trim()).filter(Boolean))];
+};
+
 
 let connections = {}
 let messages = {}
 let timeOnline = {}
 
 export const connectToSocket = (server) => {
+    const allowedOrigins = normalizeOrigins(process.env.SOCKET_CORS_ORIGIN, [
+        process.env.CORS_ORIGIN,
+        process.env.FRONTEND_URL,
+        "http://localhost:3000",
+    ]);
+
     const io = new Server(server, {
         cors: {
-            origin: "*",
+            origin: allowedOrigins.length > 0 ? allowedOrigins : true,
             methods: ["GET", "POST"],
-            allowedHeaders: ["*"],
             credentials: true
         }
     });

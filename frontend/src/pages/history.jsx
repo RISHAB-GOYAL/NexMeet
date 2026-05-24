@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import HomeIcon from '@mui/icons-material/Home';
 
 import { IconButton } from '@mui/material';
+import "../App.css";
 export default function History() {
 
 
@@ -45,21 +46,24 @@ export default function History() {
     }
 
     return (
-        <div>
+        <div className="historyShell">
 
+            <div className="historyHeader">
             <IconButton onClick={() => {
                 routeTo("/home")
             }}>
                 <HomeIcon />
             </IconButton >
+            <h1>Meeting History</h1>
+            </div>
             {
-                (meetings.length !== 0) ? meetings.map((e, i) => {
+                (meetings.length !== 0) ? <div className="historyGrid">{meetings.map((e, i) => {
                     return (
 
                         <>
 
 
-                            <Card key={i} variant="outlined">
+                            <Card key={i} variant="outlined" className="historyCard">
 
 
                                 <CardContent>
@@ -79,7 +83,7 @@ export default function History() {
 
                         </>
                     )
-                }) : <></>
+                })}</div> : <p style={{ color: "rgba(226,232,240,0.72)" }}>No meetings yet.</p>
 
             }
 

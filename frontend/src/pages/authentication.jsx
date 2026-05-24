@@ -3,14 +3,10 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AuthContext } from '../contexts/AuthContext';
 import { Snackbar } from '@mui/material';
@@ -35,9 +31,49 @@ export default function Authentication() {
     const [formState, setFormState] = React.useState(0);
 
     const [open, setOpen] = React.useState(false)
+    const [authBackground, setAuthBackground] = React.useState("");
 
 
     const { handleRegister, handleLogin } = React.useContext(AuthContext);
+
+    React.useEffect(() => {
+        const randomSeed = Date.now();
+        const imageCandidates = [
+            `https://picsum.photos/1600/1200?random=${randomSeed}`,
+            `https://source.unsplash.com/1600x1200/?nature,landscape&sig=${randomSeed}`,
+            `https://loremflickr.com/1600/1200/nature?lock=${randomSeed}`
+        ];
+
+        let isCancelled = false;
+
+        const tryLoadImage = (index) => {
+            if (isCancelled) return;
+
+            if (index >= imageCandidates.length) {
+                setAuthBackground("linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #22c55e 100%)");
+                return;
+            }
+
+            const image = new Image();
+            image.src = imageCandidates[index];
+
+            image.onload = () => {
+                if (!isCancelled) {
+                    setAuthBackground(`url(${imageCandidates[index]})`);
+                }
+            };
+
+            image.onerror = () => {
+                tryLoadImage(index + 1);
+            };
+        };
+
+        tryLoadImage(0);
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
 
     let handleAuth = async () => {
         try {
@@ -68,7 +104,7 @@ export default function Authentication() {
 
     return (
         <ThemeProvider theme={defaultTheme}>
-            <Grid container component="main" sx={{ height: '100vh' }}>
+            <Grid container component="main" className="authPage" sx={{ minHeight: '100vh' }}>
                 <CssBaseline />
                 <Grid
                     item
@@ -76,22 +112,29 @@ export default function Authentication() {
                     sm={4}
                     md={7}
                     sx={{
-                        backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
+                        backgroundImage: authBackground || "linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #22c55e 100%)",
                         backgroundRepeat: 'no-repeat',
-                        backgroundColor: (t) =>
-                            t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
+                        position: 'relative',
+                        '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'linear-gradient(160deg, rgba(7,17,31,0.28), rgba(7,17,31,0.68))'
+                        }
                     }}
                 />
-                <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+                <Grid item xs={12} sm={8} md={5} component={Paper} elevation={0} square className="authCardSurface">
                     <Box
                         sx={{
-                            my: 8,
-                            mx: 4,
+                            minHeight: '100vh',
+                            px: { xs: 3, md: 5 },
+                            py: 5,
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
+                            justifyContent: 'center',
                         }}
                     >
                         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
@@ -99,16 +142,16 @@ export default function Authentication() {
                         </Avatar>
 
 
-                        <div>
-                            <Button variant={formState === 0 ? "contained" : ""} onClick={() => { setFormState(0) }}>
+                        <div className="authTabs">
+                            <Button variant={formState === 0 ? "contained" : "text"} onClick={() => { setFormState(0) }}>
                                 Sign In
                             </Button>
-                            <Button variant={formState === 1 ? "contained" : ""} onClick={() => { setFormState(1) }}>
+                            <Button variant={formState === 1 ? "contained" : "text"} onClick={() => { setFormState(1) }}>
                                 Sign Up
                             </Button>
                         </div>
 
-                        <Box component="form" noValidate sx={{ mt: 1 }}>
+                        <Box component="form" noValidate className="authFormWrap" sx={{ mt: 2 }}>
                             {formState === 1 ? <TextField
                                 margin="normal"
                                 required
@@ -146,12 +189,13 @@ export default function Authentication() {
                                 id="password"
                             />
 
-                            <p style={{ color: "red" }}>{error}</p>
+                            <p className="authError">{error}</p>
 
                             <Button
                                 type="button"
                                 fullWidth
                                 variant="contained"
+                                className="authSubmitButton"
                                 sx={{ mt: 3, mb: 2 }}
                                 onClick={handleAuth}
                             >

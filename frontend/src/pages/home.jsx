@@ -26,11 +26,11 @@ function HomeComponent() {
 
                 <div style={{ display: "flex", alignItems: "center" }}>
 
-                    <h2>Apna Video Call</h2>
+                    <h2>NexMeet</h2>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center" }}>
-                    <IconButton onClick={
+                <div className="navActions" style={{ display: "flex", alignItems: "center" }}>
+                    <IconButton className="historyActionButton" onClick={
                         () => {
                             navigate("/history")
                         }
@@ -39,7 +39,7 @@ function HomeComponent() {
                     </IconButton>
                     <p>History</p>
 
-                    <Button onClick={() => {
+                    <Button variant="outlined" onClick={() => {
                         localStorage.removeItem("token")
                         navigate("/auth")
                     }}>
@@ -54,7 +54,8 @@ function HomeComponent() {
             <div className="meetContainer">
                 <div className="leftPanel">
                     <div>
-                        <h2>Providing Quality Video Call Just Like Quality Education</h2>
+                        <p style={{ letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", marginBottom: "0.8rem", fontSize: "0.78rem" }}>Start a meeting</p>
+                        <h2>Reliable video meetings for teams, classes, and communities</h2>
 
                         <div style={{ display: 'flex', gap: "10px" }}>
 

@@ -1,61 +1,572 @@
 .meetVideoContainer {
+    --chat-width: min(32vw, 24rem);
+    --control-dock-height: 96px;
     position: relative;
-    height: 100vh;
-    background: rgb(1, 4, 48);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(255, 159, 67, 0.12), transparent 24%),
+        linear-gradient(160deg, #07111f 0%, #0f172a 58%, #050b17 100%);
+    color: white;
+    overflow: hidden;
+}
+
+.lobbyScreen {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.lobbyCard,
+.lobbyPreviewCard {
+    position: relative;
+    background: rgba(8, 14, 28, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+    backdrop-filter: blur(18px);
+}
+
+.lobbyCard {
+    padding: 2rem;
+}
+
+.lobbyCopy h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: -0.04em;
+    margin-bottom: 0.75rem;
+}
+
+.lobbyCopy p:last-child {
+    color: rgba(226, 232, 240, 0.72);
+    line-height: 1.7;
+    max-width: 34rem;
+}
+
+.lobbyDetails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.lobbyInfoPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(248, 250, 252, 0.92);
+}
+
+.lobbyFormRow {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.lobbyInput {
+    flex: 1;
+}
+
+.lobbyInput .MuiOutlinedInput-root,
+.lobbyInput .MuiInputLabel-root {
+    color: #f8fafc;
+}
+
+.lobbyInput .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.lobbyConnectButton {
+    min-width: 140px !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #ff9f43, #ffb86b) !important;
+    color: #0b1120 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 18px 34px rgba(255, 159, 67, 0.24) !important;
+}
+
+.lobbyConnectButton:hover {
+    background: linear-gradient(135deg, #ffad57, #ffd18f) !important;
+}
+
+.lobbyPreviewCard {
+    padding: 1.25rem;
+    min-height: 26rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.lobbyPreviewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lobbyPreviewHeader p {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.lobbyPreviewHeader span {
+    color: rgba(226, 232, 240, 0.72);
+    font-size: 0.9rem;
+}
+
+.lobbyVideoFrame {
+    flex: 1;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at center, rgba(56, 189, 248, 0.14), transparent 28%),
+        rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    min-height: 20rem;
+}
+
+.lobbyVideoFrame video {
+    width: 100%;
+    height: 100%;
+    min-height: 20rem;
+    object-fit: cover;
+    background: rgba(15, 23, 42, 0.9);
+}
+
+.meetHeaderBar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 1rem 0;
+    padding: 1rem 1.25rem;
+    background: rgba(8, 14, 28, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+}
+
+.meetEyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(248, 250, 252, 0.82);
+    margin-bottom: 0.25rem;
+    font-weight: 800;
+}
+
+.meetHeaderBar h2 {
+    font-size: 1.5rem;
+    line-height: 1.1;
+}
+
+.meetRoomBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(248, 250, 252, 0.92);
+    font-size: 0.95rem;
+    max-width: 100%;
+}
+
+.meetRoomBadge span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 28ch;
+}
+
+.meetBadgeDot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.14);
+    flex: 0 0 auto;
 }
 
 .meetUserVideo {
     position: absolute;
-    bottom: 10vh;
+    bottom: calc(var(--control-dock-height) + 20px);
+    left: 1.25rem;
     height: 20vh;
+    max-width: 16rem;
     width: auto;
-    left: 0;
     border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+    background: rgba(15, 23, 42, 0.85);
 }
 
 .buttonContainers {
     position: absolute;
     width: 100vw;
-    bottom: 0;
-    text-align: center;
+    bottom: 18px;
+    left: 0;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    z-index: 3;
 }
 
 .buttonContainers svg {
-    font-size: 3rem;
+    font-size: 1.35rem;
+}
+
+.controlButton,
+.endCallButton {
+    min-width: 76px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.8rem 0.95rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: #f8fafc;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.controlButton:hover,
+.endCallButton:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.controlButton span,
+.endCallButton span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.controlButton svg,
+.endCallButton svg {
+    font-size: 1.45rem;
+}
+
+.endCallButton {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-color: rgba(239, 68, 68, 0.38);
+}
+
+.endCallButton:hover {
+    background: linear-gradient(135deg, #f87171, #ef4444);
 }
 
 .conferenceView { 
 
     display: flex;
-    
-    padding: 10px;
-    gap: 10px;
+    flex-wrap: wrap;
+    padding: 1rem calc(var(--chat-width) + 1rem) calc(var(--control-dock-height) + 1.5rem) 1rem;
+    gap: 1rem;
+    align-content: flex-start;
+    width: 100%;
+    min-height: calc(100vh - 110px);
 }
 
 .conferenceView  video {
-    width: 40vw;
-    height: 20vh;
-    min-width: 30vw;
-    border-radius: 10px;
+    width: min(100%, 24rem);
+    height: 15rem;
+    min-width: 15rem;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
 }
 
 .chatRoom {
     position: absolute;
-    height: 90vh;
+    top: 7rem;
+    bottom: 6.2rem;
     right: 0;
-    background: white;
-    border-radius: 10px;
-    width: 30vw;
-    padding-inline: 20px;
+    width: var(--chat-width);
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    border-radius: 24px 0 0 24px;
+    padding: 1.25rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    color: #0f172a;
+    font-weight: 700;
 }
 
 .chatContainer {
     position: relative;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
+.chatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.chatContainer h1 {
+    font-size: 1.6rem;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.chatCount {
+    padding: 0.5rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.05);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    color: rgba(15, 23, 42, 0.72);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    font-weight: 800;
+}
 
 .chattingArea {
     position: absolute;
     bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.chattingArea .MuiTextField-root {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 14px;
+}
+
+.chatInput {
+    min-width: 0;
+}
+
+.chattingArea .MuiOutlinedInput-root,
+.chattingArea .MuiInputLabel-root {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.chattingArea .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(15, 23, 42, 0.14);
+}
+
+.chatContainer .chattingDisplay {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.4rem;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    font-weight: 700;
+}
+
+.chatMessageCard {
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    font-weight: 700;
+}
+
+.chatSender {
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.chatMessageText {
+    color: rgba(15, 23, 42, 0.84);
+    line-height: 1.6;
+    word-break: break-word;
+    font-weight: 700;
+}
+
+.chatEmptyState {
+    display: grid;
+    place-items: center;
+    min-height: 10rem;
+    text-align: center;
+    gap: 0.35rem;
+    color: rgba(15, 23, 42, 0.66);
+    border: 1px dashed rgba(15, 23, 42, 0.14);
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.03);
+    font-weight: 700;
+}
+
+.chatEmptyState p {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.chatEmptyState span {
+    font-weight: 700;
+}
+
+.chatEmptyState span {
+    font-size: 0.9rem;
+}
+
+.chatSendButton {
+    min-width: 88px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #ff9f43, #ffb86b) !important;
+    color: #0b1120 !important;
+    font-weight: 700 !important;
+}
+
+.chatSendButton:hover {
+    background: linear-gradient(135deg, #ffad57, #ffd18f) !important;
+}
+
+.buttonContainers .MuiIconButton-root {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+}
+
+.buttonContainers .MuiIconButton-root:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 900px) {
+    .lobbyScreen {
+        grid-template-columns: 1fr;
+    }
+
+    .lobbyPreviewCard {
+        min-height: 22rem;
+    }
+
+    .chatRoom {
+        width: min(100vw - 2rem, 24rem);
+        top: 8.5rem;
+    }
+
+    .conferenceView {
+        padding-right: 1rem;
+    }
+
+    .meetUserVideo {
+        height: 14vh;
+        bottom: 92px;
+    }
+}
+
+@media (max-width: 640px) {
+    .lobbyScreen {
+        padding: 1rem;
+    }
+
+    .lobbyCard,
+    .lobbyPreviewCard {
+        border-radius: 22px;
+    }
+
+    .lobbyFormRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lobbyConnectButton {
+        min-width: 100% !important;
+    }
+
+    .lobbyVideoFrame,
+    .lobbyVideoFrame video {
+        min-height: 16rem;
+    }
+
+    .meetHeaderBar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .conferenceView video {
+        width: 100%;
+        min-width: 0;
+        height: 12rem;
+    }
+
+    .chatRoom {
+        left: 1rem;
+        right: 1rem;
+        width: auto;
+        border-radius: 20px;
+        top: 9.25rem;
+        bottom: 7rem;
+    }
+
+    .conferenceView {
+        padding: 1rem 1rem 8rem;
+        min-height: auto;
+    }
+
+    .buttonContainers {
+        bottom: 12px;
+        gap: 0.45rem;
+        padding-inline: 0.75rem;
+    }
+
+    .meetUserVideo {
+        left: 1rem;
+        max-width: 10rem;
+        height: 12vh;
+    }
+
+    .controlButton,
+    .endCallButton {
+        min-width: 68px;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .controlButton span,
+    .endCallButton span {
+        font-size: 0.66rem;
+    }
+
+    .chatHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .chattingArea {
+        flex-direction: column;
+    }
+
+    .chatSendButton {
+        min-width: 100% !important;
+    }
 }

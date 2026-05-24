@@ -34,15 +34,15 @@ export default function VideoMeetComponent() {
 
     let [audioAvailable, setAudioAvailable] = useState(true);
 
-    let [video, setVideo] = useState([]);
+    let [video, setVideo] = useState(true);
 
-    let [audio, setAudio] = useState();
+    let [audio, setAudio] = useState(true);
 
-    let [screen, setScreen] = useState();
+    let [screen, setScreen] = useState(false);
 
     let [showModal, setModal] = useState(true);
 
-    let [screenAvailable, setScreenAvailable] = useState();
+    let [screenAvailable, setScreenAvailable] = useState(false);
 
     let [messages, setMessages] = useState([])
 
@@ -57,6 +57,7 @@ export default function VideoMeetComponent() {
     const videoRef = useRef([])
 
     let [videos, setVideos] = useState([])
+    const meetingId = window.location.pathname.replace("/", "") || "meeting-room";
 
     // TODO
     // if(isChrome() === false) {
@@ -65,10 +66,8 @@ export default function VideoMeetComponent() {
     // }
 
     useEffect(() => {
-        console.log("HELLO")
         getPermissions();
-
-    })
+    }, [])
 
     let getDislayMedia = () => {
         if (screen) {
@@ -82,24 +81,22 @@ export default function VideoMeetComponent() {
     }
 
     const getPermissions = async () => {
-        try {
-            const videoPermission = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (videoPermission) {
-                setVideoAvailable(true);
-                console.log('Video permission granted');
-            } else {
-                setVideoAvailable(false);
-                console.log('Video permission denied');
-            }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setVideoAvailable(false);
+            setAudioAvailable(false);
+            return;
+        }
 
-            const audioPermission = await navigator.mediaDevices.getUserMedia({ audio: true });
-            if (audioPermission) {
-                setAudioAvailable(true);
-                console.log('Audio permission granted');
-            } else {
-                setAudioAvailable(false);
-                console.log('Audio permission denied');
-            }
+        try {
+            const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+            const hasVideo = userMediaStream.getVideoTracks().length > 0;
+            const hasAudio = userMediaStream.getAudioTracks().length > 0;
+
+            setVideoAvailable(hasVideo);
+            setAudioAvailable(hasAudio);
+            setVideo(hasVideo);
+            setAudio(hasAudio);
 
             if (navigator.mediaDevices.getDisplayMedia) {
                 setScreenAvailable(true);
@@ -107,16 +104,13 @@ export default function VideoMeetComponent() {
                 setScreenAvailable(false);
             }
 
-            if (videoAvailable || audioAvailable) {
-                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable });
-                if (userMediaStream) {
-                    window.localStream = userMediaStream;
-                    if (localVideoref.current) {
-                        localVideoref.current.srcObject = userMediaStream;
-                    }
-                }
+            window.localStream = userMediaStream;
+            if (localVideoref.current) {
+                localVideoref.current.srcObject = userMediaStream;
             }
         } catch (error) {
+            setVideoAvailable(false);
+            setAudioAvailable(false);
             console.log(error);
         }
     };
@@ -146,7 +140,9 @@ export default function VideoMeetComponent() {
         } catch (e) { console.log(e) }
 
         window.localStream = stream
-        localVideoref.current.srcObject = stream
+        if (localVideoref.current) {
+            localVideoref.current.srcObject = stream
+        }
 
         for (let id in connections) {
             if (id === socketIdRef.current) continue
@@ -215,7 +211,9 @@ export default function VideoMeetComponent() {
         } catch (e) { console.log(e) }
 
         window.localStream = stream
-        localVideoref.current.srcObject = stream
+        if (localVideoref.current) {
+            localVideoref.current.srcObject = stream
+        }
 
         for (let id in connections) {
             if (id === socketIdRef.current) continue
@@ -451,16 +449,49 @@ export default function VideoMeetComponent() {
 
             {askForUsername === true ?
 
-                <div>
+                <div className={styles.lobbyScreen}>
+                    <div className={styles.lobbyCard}>
+                        <div className={styles.lobbyCopy}>
+                            <p className={styles.meetEyebrow}>Ready to join</p>
+                            <h2>Enter the lobby</h2>
+                            <p>Choose a display name, preview your camera, and connect to the room.</p>
+                        </div>
 
+                        <div className={styles.lobbyDetails}>
+                            <div className={styles.lobbyInfoPill}>
+                                <span className={styles.meetBadgeDot}></span>
+                                <span>{meetingId}</span>
+                            </div>
+                            <div className={styles.lobbyInfoPill}>
+                                <span className={styles.meetBadgeDot}></span>
+                                <span>Camera and mic preview</span>
+                            </div>
+                        </div>
 
-                    <h2>Enter into Lobby </h2>
-                    <TextField id="outlined-basic" label="Username" value={username} onChange={e => setUsername(e.target.value)} variant="outlined" />
-                    <Button variant="contained" onClick={connect}>Connect</Button>
+                        <div className={styles.lobbyFormRow}>
+                            <TextField
+                                className={styles.lobbyInput}
+                                id="outlined-basic"
+                                label="Username"
+                                value={username}
+                                onChange={e => setUsername(e.target.value)}
+                                variant="outlined"
+                                fullWidth
+                            />
+                            <Button className={styles.lobbyConnectButton} variant="contained" onClick={connect}>
+                                Connect
+                            </Button>
+                        </div>
+                    </div>
 
-
-                    <div>
-                        <video ref={localVideoref} autoPlay muted></video>
+                    <div className={styles.lobbyPreviewCard}>
+                        <div className={styles.lobbyPreviewHeader}>
+                            <p>Preview</p>
+                            <span>What others will see</span>
+                        </div>
+                        <div className={styles.lobbyVideoFrame}>
+                            <video ref={localVideoref} autoPlay muted playsInline></video>
+                        </div>
                     </div>
 
                 </div> :
@@ -468,10 +499,27 @@ export default function VideoMeetComponent() {
 
                 <div className={styles.meetVideoContainer}>
 
+                    <div className={styles.meetHeaderBar}>
+                        <div>
+                            <p className={styles.meetEyebrow}>NexMeet session</p>
+                            <h2>Meeting room</h2>
+                        </div>
+                        <div className={styles.meetRoomBadge}>
+                            <span className={styles.meetBadgeDot}></span>
+                            <span>{meetingId}</span>
+                        </div>
+                    </div>
+
                     {showModal ? <div className={styles.chatRoom}>
 
                         <div className={styles.chatContainer}>
-                            <h1>Chat</h1>
+                            <div className={styles.chatHeader}>
+                                <div>
+                                    <p className={styles.meetEyebrow}>Room chat</p>
+                                    <h1>Chat</h1>
+                                </div>
+                                <p className={styles.chatCount}>{messages.length} messages</p>
+                            </div>
 
                             <div className={styles.chattingDisplay}>
 
@@ -479,19 +527,19 @@ export default function VideoMeetComponent() {
 
                                     console.log(messages)
                                     return (
-                                        <div style={{ marginBottom: "20px" }} key={index}>
-                                            <p style={{ fontWeight: "bold" }}>{item.sender}</p>
-                                            <p>{item.data}</p>
+                                        <div className={styles.chatMessageCard} key={index}>
+                                            <p className={styles.chatSender}>{item.sender}</p>
+                                            <p className={styles.chatMessageText}>{item.data}</p>
                                         </div>
                                     )
-                                }) : <p>No Messages Yet</p>}
+                                }) : <div className={styles.chatEmptyState}><p>No messages yet.</p><span>Be the first to say hello.</span></div>}
 
 
                             </div>
 
                             <div className={styles.chattingArea}>
-                                <TextField value={message} onChange={(e) => setMessage(e.target.value)} id="outlined-basic" label="Enter Your chat" variant="outlined" />
-                                <Button variant='contained' onClick={sendMessage}>Send</Button>
+                                <TextField className={styles.chatInput} value={message} onChange={(e) => setMessage(e.target.value)} id="outlined-basic" label="Enter your message" variant="outlined" />
+                                <Button className={styles.chatSendButton} variant='contained' onClick={sendMessage}>Send</Button>
                             </div>
 
 
@@ -500,24 +548,30 @@ export default function VideoMeetComponent() {
 
 
                     <div className={styles.buttonContainers}>
-                        <IconButton onClick={handleVideo} style={{ color: "white" }}>
+                        <button className={styles.controlButton} onClick={handleVideo} type="button">
                             {(video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
-                        </IconButton>
-                        <IconButton onClick={handleEndCall} style={{ color: "red" }}>
-                            <CallEndIcon  />
-                        </IconButton>
-                        <IconButton onClick={handleAudio} style={{ color: "white" }}>
+                            <span>Video</span>
+                        </button>
+                        <button className={styles.endCallButton} onClick={handleEndCall} type="button">
+                            <CallEndIcon />
+                            <span>End</span>
+                        </button>
+                        <button className={styles.controlButton} onClick={handleAudio} type="button">
                             {audio === true ? <MicIcon /> : <MicOffIcon />}
-                        </IconButton>
+                            <span>Audio</span>
+                        </button>
 
                         {screenAvailable === true ?
-                            <IconButton onClick={handleScreen} style={{ color: "white" }}>
+                            <button className={styles.controlButton} onClick={handleScreen} type="button">
                                 {screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-                            </IconButton> : <></>}
+                                <span>Share</span>
+                            </button> : <></>}
 
                         <Badge badgeContent={newMessages} max={999} color='orange'>
-                            <IconButton onClick={() => setModal(!showModal)} style={{ color: "white" }}>
-                                <ChatIcon />                        </IconButton>
+                            <button className={styles.controlButton} onClick={() => setModal(!showModal)} type="button">
+                                <ChatIcon />
+                                <span>Chat</span>
+                            </button>
                         </Badge>
 
                     </div>
