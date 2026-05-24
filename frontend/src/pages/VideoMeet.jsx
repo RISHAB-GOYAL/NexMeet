@@ -69,6 +69,48 @@ export default function VideoMeetComponent() {
         getPermissions();
     }, [])
 
+    const getDislayMediaSuccess = useCallback((stream) => {
+        console.log("HERE")
+        try {
+            window.localStream.getTracks().forEach(track => track.stop())
+        } catch (e) { console.log(e) }
+
+        window.localStream = stream
+        if (localVideoref.current) {
+            localVideoref.current.srcObject = stream
+        }
+
+        for (let id in connections) {
+            if (id === socketIdRef.current) continue
+
+            connections[id].addStream(window.localStream)
+
+            connections[id].createOffer().then((description) => {
+                connections[id].setLocalDescription(description)
+                    .then(() => {
+                        socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
+                    })
+                    .catch(e => console.log(e))
+            })
+        }
+
+        stream.getTracks().forEach(track => track.onended = () => {
+            setScreen(false)
+
+            try {
+                let tracks = localVideoref.current.srcObject.getTracks()
+                tracks.forEach(track => track.stop())
+            } catch (e) { console.log(e) }
+
+            let blackSilence = (...args) => new MediaStream([black(...args), silence()])
+            window.localStream = blackSilence()
+            localVideoref.current.srcObject = window.localStream
+
+            getUserMedia()
+
+        })
+    }, [getUserMedia])
+
     const getDislayMedia = useCallback(() => {
         if (screen) {
             if (navigator.mediaDevices.getDisplayMedia) {
@@ -78,7 +120,7 @@ export default function VideoMeetComponent() {
                     .catch((e) => console.log(e))
             }
         }
-    }, [screen])
+    }, [getDislayMediaSuccess, screen])
 
     const getPermissions = async () => {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -115,7 +157,7 @@ export default function VideoMeetComponent() {
         }
     };
 
-    function getUserMediaSuccess(stream) {
+    const getUserMediaSuccess = useCallback((stream) => {
         try {
             window.localStream.getTracks().forEach(track => track.stop())
         } catch (e) { console.log(e) }
@@ -165,7 +207,7 @@ export default function VideoMeetComponent() {
                 })
             }
         })
-    }
+    }, [setAudio, setVideo])
 
     const getUserMedia = useCallback(() => {
         if ((video && videoAvailable) || (audio && audioAvailable)) {
@@ -179,7 +221,7 @@ export default function VideoMeetComponent() {
                 tracks.forEach(track => track.stop())
             } catch (e) { }
         }
-    }, [audio, audioAvailable, video, videoAvailable])
+    }, [audio, audioAvailable, getUserMediaSuccess, video, videoAvailable])
 
     useEffect(() => {
         if (video !== undefined && audio !== undefined) {
@@ -196,48 +238,6 @@ export default function VideoMeetComponent() {
         connectToSocketServer();
 
     }
-    const getDislayMediaSuccess = (stream) => {
-        console.log("HERE")
-        try {
-            window.localStream.getTracks().forEach(track => track.stop())
-        } catch (e) { console.log(e) }
-
-        window.localStream = stream
-        if (localVideoref.current) {
-            localVideoref.current.srcObject = stream
-        }
-
-        for (let id in connections) {
-            if (id === socketIdRef.current) continue
-
-            connections[id].addStream(window.localStream)
-
-            connections[id].createOffer().then((description) => {
-                connections[id].setLocalDescription(description)
-                    .then(() => {
-                        socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
-                    })
-                    .catch(e => console.log(e))
-            })
-        }
-
-        stream.getTracks().forEach(track => track.onended = () => {
-            setScreen(false)
-
-            try {
-                let tracks = localVideoref.current.srcObject.getTracks()
-                tracks.forEach(track => track.stop())
-            } catch (e) { console.log(e) }
-
-            let blackSilence = (...args) => new MediaStream([black(...args), silence()])
-            window.localStream = blackSilence()
-            localVideoref.current.srcObject = window.localStream
-
-            getUserMedia()
-
-        })
-    }
-
     let gotMessageFromServer = (fromId, message) => {
         var signal = JSON.parse(message)
 
@@ -382,10 +382,10 @@ export default function VideoMeetComponent() {
     }
 
     useEffect(() => {
-        if (screen !== undefined) {
+        if (screen) {
             getDislayMedia();
         }
-    }, [getDislayMedia])
+    }, [getDislayMedia, screen])
     let handleScreen = () => {
         setScreen(!screen);
     }
