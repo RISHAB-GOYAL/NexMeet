@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import io from "socket.io-client";
-import { Badge, IconButton, TextField } from '@mui/material';
+import { Badge, TextField } from '@mui/material';
 import { Button } from '@mui/material';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
@@ -69,7 +69,7 @@ export default function VideoMeetComponent() {
         getPermissions();
     }, [])
 
-    let getDislayMedia = () => {
+    const getDislayMedia = useCallback(() => {
         if (screen) {
             if (navigator.mediaDevices.getDisplayMedia) {
                 navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
@@ -78,7 +78,7 @@ export default function VideoMeetComponent() {
                     .catch((e) => console.log(e))
             }
         }
-    }
+    }, [screen])
 
     const getPermissions = async () => {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -115,26 +115,7 @@ export default function VideoMeetComponent() {
         }
     };
 
-    useEffect(() => {
-        if (video !== undefined && audio !== undefined) {
-            getUserMedia();
-            console.log("SET STATE HAS ", video, audio);
-
-        }
-
-
-    }, [video, audio])
-    let getMedia = () => {
-        setVideo(videoAvailable);
-        setAudio(audioAvailable);
-        connectToSocketServer();
-
-    }
-
-
-
-
-    let getUserMediaSuccess = (stream) => {
+    function getUserMediaSuccess(stream) {
         try {
             window.localStream.getTracks().forEach(track => track.stop())
         } catch (e) { console.log(e) }
@@ -186,7 +167,7 @@ export default function VideoMeetComponent() {
         })
     }
 
-    let getUserMedia = () => {
+    const getUserMedia = useCallback(() => {
         if ((video && videoAvailable) || (audio && audioAvailable)) {
             navigator.mediaDevices.getUserMedia({ video: video, audio: audio })
                 .then(getUserMediaSuccess)
@@ -198,13 +179,24 @@ export default function VideoMeetComponent() {
                 tracks.forEach(track => track.stop())
             } catch (e) { }
         }
+    }, [audio, audioAvailable, video, videoAvailable])
+
+    useEffect(() => {
+        if (video !== undefined && audio !== undefined) {
+            getUserMedia();
+            console.log("SET STATE HAS ", video, audio);
+
+        }
+
+
+    }, [audio, getUserMedia, video])
+    let getMedia = () => {
+        setVideo(videoAvailable);
+        setAudio(audioAvailable);
+        connectToSocketServer();
+
     }
-
-
-
-
-
-    let getDislayMediaSuccess = (stream) => {
+    const getDislayMediaSuccess = (stream) => {
         console.log("HERE")
         try {
             window.localStream.getTracks().forEach(track => track.stop())
@@ -393,7 +385,7 @@ export default function VideoMeetComponent() {
         if (screen !== undefined) {
             getDislayMedia();
         }
-    }, [screen])
+    }, [getDislayMedia])
     let handleScreen = () => {
         setScreen(!screen);
     }
@@ -404,17 +396,6 @@ export default function VideoMeetComponent() {
             tracks.forEach(track => track.stop())
         } catch (e) { }
         window.location.href = "/"
-    }
-
-    let openChat = () => {
-        setModal(true);
-        setNewMessages(0);
-    }
-    let closeChat = () => {
-        setModal(false);
-    }
-    let handleMessage = (e) => {
-        setMessage(e.target.value);
     }
 
     const addMessage = (data, sender, socketIdSender) => {
